@@ -1,0 +1,33 @@
+name: Compile Swift dylib from ZIP
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    # 1. Скачиваем репозиторий с вашим ZIP-файлом
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Распаковываем ZIP-архив в папку "src"
+    - name: Unzip source code
+      run: unzip PhanthomGiftKit.zip -d src
+
+    # 3. Компилируем Swift файлы в динамическую библиотеку (.dylib)
+    # Флаг -emit-library указывает создать библиотеку
+    # Флаг -module-name задает внутреннее имя модуля Swift
+    - name: Compile Swift dylib
+      run: |
+        cd src
+        swiftc -emit-library -o libmyswiftlib.dylib *.swift -module-name MySwiftModule
+
+    # 4. Сохраняем готовую библиотеку
+    - name: Upload Finished Dylib
+      uses: actions/upload-artifact@v4
+      with:
+        name: swift-dylib
+        path: src/libmyswiftlib.dylib
